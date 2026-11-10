@@ -1,0 +1,16 @@
+username,password,title,body,user_id,patched_title
+Bret,Password@123,Load test post 01,Parameterized body 01,1,Load test post 01 updated
+bret,Password@123,Load test post 02,Parameterized body 02,2,Load test post 02 updated
+BRET,Password@123,Load test post 03,Parameterized body 03,3,Load test post 03 updated
+Bret,Password@123,Load test post 04,Parameterized body 04,4,Load test post 04 updated
+bret,Password@123,Load test post 05,Parameterized body 05,5,Load test post 05 updated
+BRET,Password@123,Load test post 06,Parameterized body 06,6,Load test post 06 updated
+Bret,Password@123,Load test post 07,Parameterized body 07,7,Load test post 07 updated
+bret,Password@123,Load test post 08,Parameterized body 08,8,Load test post 08 updated
+BRET,Password@123,Load test post 09,Parameterized body 09,9,Load test post 09 updated
+Bret,Password@123,Load test post 10,Parameterized body 10,10,Load test post 10 updated
+bret,Password@123,Load test post 11,Parameterized body 11,11,Load test post 11 updated
+BRET,Password@123,Load test post 12,Parameterized body 12,12,Load test post 12 updated
+Bret,Password@123,Load test post 13,Parameterized body 13,1,Load test post 13 updated
+bret,Password@123,Load test post 14,Parameterized body 14,2,Load test post 14 updated
+BRET,Password@123,Load test post 15,Parameterized body 15,3,Load test post 15 updated

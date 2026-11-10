@@ -1,0 +1,24 @@
+# Binaries
+*.exe
+*.test
+*.out
+
+# Go
+/vendor/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Local scratch
+_*.json
+_*.txt
+_*.html
+
+# Per-request server journal from the load run
+loadtest/results/server.log

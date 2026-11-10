@@ -1,0 +1,518 @@
+﻿{
+  "info": {
+    "name": "API Testing Seminar — REST, Auth, GraphQL",
+    "_postman_id": "8d3a8f74-9c0f-4d4e-8d5d-2c9a4f69b0f1",
+    "description": "Учебная коллекция для семинара по API-тестированию. Содержит REST, цепочку авторизации с Bearer token, GraphQL query, mutation и subscription. REST/Auth: Playground API. GraphQL: Postman GraphQL Echo. Subscription отправляется как GraphQL over HTTP с SSE (Accept: text/event-stream), чтобы все примеры находились в одной экспортируемой HTTP-коллекции.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('playground_identity')) {",
+          "  const guid = pm.variables.replaceIn('{{$guid}}');",
+          "  pm.collectionVariables.set('playground_identity', 'seminar-' + guid);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "playground_base",
+      "value": "https://playground.nileslabs.com/api/v1"
+    },
+    {
+      "key": "graphql_echo",
+      "value": "https://graphql.postman-echo.com/graphql"
+    },
+    {
+      "key": "playground_identity",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "created_post_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. REST — простые вызовы",
+      "item": [
+        {
+          "name": "GET — список постов",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Playground-Identity",
+                "value": "{{playground_identity}}"
+              }
+            ],
+            "url": {
+              "raw": "{{playground_base}}/posts?_limit=3",
+              "host": [
+                "{{playground_base}}"
+              ],
+              "path": [
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "_limit",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Пример GET с query-параметром _limit."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ответ — JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET — пользователь по ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Playground-Identity",
+                "value": "{{playground_identity}}"
+              }
+            ],
+            "url": {
+              "raw": "{{playground_base}}/users/1",
+              "host": [
+                "{{playground_base}}"
+              ],
+              "path": [
+                "users",
+                "1"
+              ]
+            },
+            "description": "Пример path-параметра: /users/1."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Есть id', () => pm.expect(json.id).to.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST — создать пост",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Playground-Identity",
+                "value": "{{playground_identity}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman seminar post\",\n  \"body\": \"Created during API testing seminar\",\n  \"user_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{playground_base}}/posts",
+              "host": [
+                "{{playground_base}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Создаёт пост и сохраняет его id в collection variable created_post_id."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Создан объект с id', () => pm.expect(json.id).to.exist);",
+                  "pm.collectionVariables.set('created_post_id', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH — изменить созданный пост",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Playground-Identity",
+                "value": "{{playground_identity}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{playground_base}}/posts/{{created_post_id}}",
+              "host": [
+                "{{playground_base}}"
+              ],
+              "path": [
+                "posts",
+                "{{created_post_id}}"
+              ]
+            },
+            "description": "Использует id из предыдущего POST-запроса."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Title изменён', () => pm.expect(json.title).to.eql('Updated from Postman'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET — получить изменённый пост",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Playground-Identity",
+                "value": "{{playground_identity}}"
+              }
+            ],
+            "url": {
+              "raw": "{{playground_base}}/posts/{{created_post_id}}",
+              "host": [
+                "{{playground_base}}"
+              ],
+              "path": [
+                "posts",
+                "{{created_post_id}}"
+              ]
+            },
+            "description": "Получает пост по id, сохранённому после POST. Запрос выполняется после PATCH и проверяет, что изменения сохранились."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Получен тот же пост', () => {",
+                  "    pm.expect(String(json.id)).to.eql(String(pm.collectionVariables.get('created_post_id')));",
+                  "});",
+                  "pm.test('Изменение сохранилось', () => {",
+                  "    pm.expect(json.title).to.eql('Updated from Postman');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. REST — авторизация и Bearer token",
+      "item": [
+        {
+          "name": "POST — Login и сохранить token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Playground-Identity",
+                "value": "{{playground_identity}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"Bret\",\n  \"password\": \"Password@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{playground_base}}/auth/login",
+              "host": [
+                "{{playground_base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Получает access_token. Test script сохраняет его в collection variable access_token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('access_token получен', () => pm.expect(json.access_token).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('access_token', json.access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET — защищённый /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "X-Playground-Identity",
+                "value": "{{playground_identity}}"
+              }
+            ],
+            "url": {
+              "raw": "{{playground_base}}/auth/me",
+              "host": [
+                "{{playground_base}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Использует Bearer token, полученный предыдущим запросом."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Пользователь определён', () => pm.expect(json.username).to.exist);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. GraphQL",
+      "item": [
+        {
+          "name": "GraphQL Query — Hello",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query Hello {\\n  hello(person: { name: \\\"Ivan\\\", age: 35 })\\n}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{graphql_echo}}",
+              "host": [
+                "{{graphql_echo}}"
+              ]
+            },
+            "description": "Простой GraphQL query."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('GraphQL data есть', () => pm.expect(json.data).to.exist);",
+                  "pm.test('Нет GraphQL errors', () => pm.expect(json.errors).to.be.undefined);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GraphQL Mutation — CreatePerson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation CreatePerson {\\n  createPerson(person: { name: \\\"Student\\\", age: 20 }) {\\n    id\\n    name\\n    age\\n  }\\n}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{graphql_echo}}",
+              "host": [
+                "{{graphql_echo}}"
+              ]
+            },
+            "description": "GraphQL mutation, создающая Person."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Mutation вернула Person', () => { pm.expect(json.data.createPerson.name).to.eql('Student'); pm.expect(json.data.createPerson.id).to.exist; });",
+                  "pm.test('Нет GraphQL errors', () => pm.expect(json.errors).to.be.undefined);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GraphQL Subscription — Greetings (SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"subscription Greetings {\\n  greetings\\n}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{graphql_echo}}",
+              "host": [
+                "{{graphql_echo}}"
+              ]
+            },
+            "description": "Реальная GraphQL subscription. Поток приходит как Server-Sent Events (SSE): несколько событий greetings."
+          }
+        }
+      ]
+    }
+  ]
+}

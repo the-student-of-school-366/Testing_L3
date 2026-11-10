@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Нагрузочное тестирование REST API</title>
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #5e584f;
+      --line: #e3d9cc;
+      --paper: #f7f3ec;
+      --card: #fffdf9;
+      --accent: #0f6e56;
+      --accent-soft: #d7efe6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.5 "Segoe UI", sans-serif;
+    }
+    main { max-width: 980px; margin: 0 auto; padding: 40px 24px 72px; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; letter-spacing: -0.02em; }
+    h1 { font-size: 40px; line-height: 1.15; margin: 0 0 8px; }
+    h2 { font-size: 26px; margin: 36px 0 12px; }
+    p { margin: 0 0 12px; }
+    .lede { color: var(--muted); max-width: 68ch; }
+    .meta { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+    table { width: 100%; border-collapse: collapse; background: var(--card); }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { font-size: 13px; letter-spacing: 0.02em; color: var(--muted); font-weight: 600; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .card { background: var(--card); border: 1px solid var(--line); padding: 16px 18px; margin: 12px 0 20px; }
+    .bar-row { display: grid; grid-template-columns: 92px 1fr 72px; gap: 10px; align-items: center; margin: 8px 0; }
+    .track { height: 10px; background: #efe8dc; }
+    .fill { height: 10px; background: var(--accent); }
+    .fill.ceiling { background: transparent; outline: 1px dashed var(--accent); height: 10px; }
+    ol { margin: 8px 0 0; padding-left: 20px; }
+    code { font-family: Consolas, monospace; font-size: 0.92em; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Нагрузочное тестирование REST API</h1>
+  <p class="lede">Закрытая нагрузка на локальный сервис этого репозитория. Виртуальные пользователи логинятся, читают профиль, создают пост, читают его и обновляют заголовок. Данные каждой итерации берутся из CSV, перед каждым запросом — постоянная пауза.</p>
+  <p class="meta">Сформирован 2026-11-10 19:21:17 MSK · цель: http://127.0.0.1:57110</p>
+
+  <div class="card">
+    <p>Поднят in-process сервер с тем же router, что и cmd/server, включая middleware логирования. Журнал сервера: loadtest/results/server.log.</p>
+    <p>Параметризация: <code>loadtest/data/posts.csv</code>, 15 строк. В запросах используются <code>username</code>, <code>password</code>, <code>title</code>, <code>body</code>, <code>user_id</code>, <code>patched_title</code>. Пауза: 200 мс перед каждым запросом (constant think time).</p>
+  </div>
+
+  <h2>Сценарий и проверки</h2>
+  <ol>
+    <li><code>POST /api/v1/auth/login</code> — HTTP 200, непустой <code>access_token</code>, username совпал с CSV.</li>
+    <li><code>GET /api/v1/auth/me</code> — HTTP 200, Bearer-токен, username и email на месте.</li>
+    <li><code>POST /api/v1/posts</code> — HTTP 201, <code>id</code> не пустой, title и user_id совпали с CSV.</li>
+    <li><code>GET /api/v1/posts/{id}</code> — HTTP 200, тот же id и исходный title.</li>
+    <li><code>PATCH /api/v1/posts/{id}</code> — HTTP 200, title равен <code>patched_title</code>.</li>
+  </ol>
+
+  <h2>Сравнение уровней нагрузки</h2>
+  <p>Цифры ниже сняты в окне полной конкуренции: ramp-up уже закончился, первый пользователь ещё не остановился. Так три запуска сопоставимы, хотя ramp-up у них разный. Общий итог вместе с разгоном — в следующей таблице.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Нагрузка</th>
+        <th class="num">Throughput / RPS</th>
+        <th class="num">Average, мс</th>
+        <th class="num">Median, мс</th>
+        <th class="num">p95, мс</th>
+        <th class="num">Error Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td>10 users, ramp-up 10 с</td>
+        <td class="num">50.0</td>
+        <td class="num">0.496</td>
+        <td class="num">0.505</td>
+        <td class="num">1.577</td>
+        <td class="num">0.00%</td>
+      </tr>
+      
+      <tr>
+        <td>25 users, ramp-up 25 с</td>
+        <td class="num">124.7</td>
+        <td class="num">0.464</td>
+        <td class="num">0.523</td>
+        <td class="num">1.180</td>
+        <td class="num">0.00%</td>
+      </tr>
+      
+      <tr>
+        <td>50 users, ramp-up 50 с</td>
+        <td class="num">248.9</td>
+        <td class="num">0.231</td>
+        <td class="num">0.000</td>
+        <td class="num">0.759</td>
+        <td class="num">0.00%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+
+  <h2>Throughput и потолок паузы</h2>
+  <p>Сплошная полоса — измеренный RPS. Пунктир — потолок, если сервер отвечает мгновенно, а пользователь ждёт 200 мс перед каждым запросом.</p>
+  
+  <div class="bar-row">
+    <div>10 users</div>
+    <div class="track"><div class="fill" style="width: 20%"></div></div>
+    <div class="num">50.0</div>
+  </div>
+  <div class="bar-row">
+    <div></div>
+    <div class="track"><div class="fill ceiling" style="width: 20%"></div></div>
+    <div class="num">50</div>
+  </div>
+  
+  <div class="bar-row">
+    <div>25 users</div>
+    <div class="track"><div class="fill" style="width: 50%"></div></div>
+    <div class="num">124.7</div>
+  </div>
+  <div class="bar-row">
+    <div></div>
+    <div class="track"><div class="fill ceiling" style="width: 50%"></div></div>
+    <div class="num">125</div>
+  </div>
+  
+  <div class="bar-row">
+    <div>50 users</div>
+    <div class="track"><div class="fill" style="width: 100%"></div></div>
+    <div class="num">248.9</div>
+  </div>
+  <div class="bar-row">
+    <div></div>
+    <div class="track"><div class="fill ceiling" style="width: 100%"></div></div>
+    <div class="num">250</div>
+  </div>
+  
+
+  <h2>Весь запуск, включая ramp-up</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Нагрузка</th>
+        <th class="num">Wall, с</th>
+        <th class="num">Samples</th>
+        <th class="num">RPS</th>
+        <th class="num">Average, мс</th>
+        <th class="num">p95, мс</th>
+        <th class="num">Error Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td>10 users</td>
+        <td class="num">34.2</td>
+        <td class="num">1250</td>
+        <td class="num">36.6</td>
+        <td class="num">0.449</td>
+        <td class="num">1.283</td>
+        <td class="num">0.00%</td>
+      </tr>
+      
+      <tr>
+        <td>25 users</td>
+        <td class="num">64.2</td>
+        <td class="num">5000</td>
+        <td class="num">77.8</td>
+        <td class="num">0.431</td>
+        <td class="num">1.109</td>
+        <td class="num">0.00%</td>
+      </tr>
+      
+      <tr>
+        <td>50 users</td>
+        <td class="num">114.5</td>
+        <td class="num">16250</td>
+        <td class="num">141.9</td>
+        <td class="num">0.340</td>
+        <td class="num">1.047</td>
+        <td class="num">0.00%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+
+  <h2>По запросам, установившееся окно</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Нагрузка</th>
+        <th>Запрос</th>
+        <th class="num">Samples</th>
+        <th class="num">RPS</th>
+        <th class="num">Average, мс</th>
+        <th class="num">p95, мс</th>
+        <th class="num">Errors</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+        
+        
+        <tr>
+          <td>10 users</td>
+          <td><code>POST /api/v1/auth/login</code></td>
+          <td class="num">150</td>
+          <td class="num">10.0</td>
+          <td class="num">0.669</td>
+          <td class="num">2.602</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>10 users</td>
+          <td><code>GET /api/v1/auth/me</code></td>
+          <td class="num">150</td>
+          <td class="num">10.0</td>
+          <td class="num">0.372</td>
+          <td class="num">1.076</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>10 users</td>
+          <td><code>POST /api/v1/posts</code></td>
+          <td class="num">150</td>
+          <td class="num">10.0</td>
+          <td class="num">0.557</td>
+          <td class="num">2.060</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>10 users</td>
+          <td><code>GET /api/v1/posts/{id}</code></td>
+          <td class="num">150</td>
+          <td class="num">10.0</td>
+          <td class="num">0.454</td>
+          <td class="num">1.380</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>10 users</td>
+          <td><code>PATCH /api/v1/posts/{id}</code></td>
+          <td class="num">150</td>
+          <td class="num">10.0</td>
+          <td class="num">0.428</td>
+          <td class="num">1.325</td>
+          <td class="num">0</td>
+        </tr>
+        
+      
+        
+        
+        <tr>
+          <td>25 users</td>
+          <td><code>POST /api/v1/auth/login</code></td>
+          <td class="num">375</td>
+          <td class="num">25.0</td>
+          <td class="num">0.493</td>
+          <td class="num">1.089</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>25 users</td>
+          <td><code>GET /api/v1/auth/me</code></td>
+          <td class="num">375</td>
+          <td class="num">25.0</td>
+          <td class="num">0.374</td>
+          <td class="num">1.047</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>25 users</td>
+          <td><code>POST /api/v1/posts</code></td>
+          <td class="num">375</td>
+          <td class="num">25.0</td>
+          <td class="num">0.520</td>
+          <td class="num">1.465</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>25 users</td>
+          <td><code>GET /api/v1/posts/{id}</code></td>
+          <td class="num">370</td>
+          <td class="num">24.7</td>
+          <td class="num">0.407</td>
+          <td class="num">1.065</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>25 users</td>
+          <td><code>PATCH /api/v1/posts/{id}</code></td>
+          <td class="num">375</td>
+          <td class="num">25.0</td>
+          <td class="num">0.525</td>
+          <td class="num">1.274</td>
+          <td class="num">0</td>
+        </tr>
+        
+      
+        
+        
+        <tr>
+          <td>50 users</td>
+          <td><code>POST /api/v1/auth/login</code></td>
+          <td class="num">750</td>
+          <td class="num">50.0</td>
+          <td class="num">0.221</td>
+          <td class="num">0.811</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>50 users</td>
+          <td><code>GET /api/v1/auth/me</code></td>
+          <td class="num">750</td>
+          <td class="num">50.0</td>
+          <td class="num">0.231</td>
+          <td class="num">0.729</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>50 users</td>
+          <td><code>POST /api/v1/posts</code></td>
+          <td class="num">750</td>
+          <td class="num">50.0</td>
+          <td class="num">0.262</td>
+          <td class="num">0.832</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>50 users</td>
+          <td><code>GET /api/v1/posts/{id}</code></td>
+          <td class="num">733</td>
+          <td class="num">48.9</td>
+          <td class="num">0.202</td>
+          <td class="num">0.615</td>
+          <td class="num">0</td>
+        </tr>
+        
+        <tr>
+          <td>50 users</td>
+          <td><code>PATCH /api/v1/posts/{id}</code></td>
+          <td class="num">750</td>
+          <td class="num">50.0</td>
+          <td class="num">0.236</td>
+          <td class="num">0.771</td>
+          <td class="num">0</td>
+        </tr>
+        
+      
+    </tbody>
+  </table>
+
+  <h2>Вывод</h2>
+  <p>В установившемся окне 15 с при полной конкуренции throughput вырос с 50.0 до 248.9 RPS — в 4.98 раза при росте числа пользователей с 10 до 50 (в 5.0 раза).</p><p>Среднее время ответа изменилось с 0.496 до 0.231 мс, медиана — с 0.505 до 0.000 мс, p95 — с 1.577 до 0.759 мс. Медиана 0 мс означает, что не меньше половины ответов короче шага таймера и записаны как нулевые. Среднее и p95 остаются в субмиллисекундном диапазоне: это шум измерения на localhost, а не ускорение сервиса.</p><p>Ошибок нет ни на одном уровне нагрузки: error rate в установившемся окне равен 0%.</p><p>Момент деградации не наблюдался. Throughput остаётся близким к потолку think time (200 мс перед каждым запросом, около 5 RPS на пользователя). Потолок по уровням: 50 RPS при 10 пользователях; 125 RPS при 25 пользователях; 250 RPS при 50 пользователях. p95 остаётся небольшим, доля ошибок не растёт.</p><p>Стабильным можно считать весь исследованный диапазон: 10, 25, 50 виртуальных пользователей. До отказа сервис не доводился.</p>
+</main>
+</body>
+</html>

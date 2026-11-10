@@ -1,0 +1,290 @@
+[
+  {
+    "name": "10-users",
+    "users": 10,
+    "ramp_up_sec": 10,
+    "hold_sec": 15,
+    "thread_duration_sec": 25,
+    "think_time_ms": 200,
+    "think_time_ceiling_rps": 50,
+    "started": "2026-11-10T19:17:44.532533+03:00",
+    "finished": "2026-11-10T19:18:18.6949309+03:00",
+    "wall_sec": 34.1623979,
+    "overall": {
+      "samples": 1250,
+      "errors": 0,
+      "error_rate_percent": 0,
+      "throughput_rps": 36.58993738258636,
+      "average_ms": 0.44945,
+      "median_ms": 0.4592,
+      "p95_ms": 1.2827,
+      "min_ms": 0,
+      "max_ms": 7.8274
+    },
+    "steady": {
+      "samples": 750,
+      "errors": 0,
+      "error_rate_percent": 0,
+      "throughput_rps": 50,
+      "average_ms": 0.496256,
+      "median_ms": 0.5054,
+      "p95_ms": 1.5769,
+      "min_ms": 0,
+      "max_ms": 7.8274
+    },
+    "labels_steady": [
+      {
+        "label": "POST /api/v1/auth/login",
+        "samples": 150,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 10,
+        "average_ms": 0.669404,
+        "median_ms": 0.5328,
+        "p95_ms": 2.6021,
+        "min_ms": 0,
+        "max_ms": 7.8274
+      },
+      {
+        "label": "GET /api/v1/auth/me",
+        "samples": 150,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 10,
+        "average_ms": 0.372487,
+        "median_ms": 0.3298,
+        "p95_ms": 1.0764,
+        "min_ms": 0,
+        "max_ms": 2.8967
+      },
+      {
+        "label": "POST /api/v1/posts",
+        "samples": 150,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 10,
+        "average_ms": 0.557274,
+        "median_ms": 0.5105,
+        "p95_ms": 2.0604,
+        "min_ms": 0,
+        "max_ms": 3.7558
+      },
+      {
+        "label": "GET /api/v1/posts/{id}",
+        "samples": 150,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 10,
+        "average_ms": 0.454465,
+        "median_ms": 0.4018,
+        "p95_ms": 1.3804,
+        "min_ms": 0,
+        "max_ms": 5.0148
+      },
+      {
+        "label": "PATCH /api/v1/posts/{id}",
+        "samples": 150,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 10,
+        "average_ms": 0.427648,
+        "median_ms": 0.5103,
+        "p95_ms": 1.3247,
+        "min_ms": 0,
+        "max_ms": 2.1958
+      }
+    ]
+  },
+  {
+    "name": "25-users",
+    "users": 25,
+    "ramp_up_sec": 25,
+    "hold_sec": 15,
+    "thread_duration_sec": 40,
+    "think_time_ms": 200,
+    "think_time_ceiling_rps": 125,
+    "started": "2026-11-10T19:18:18.7006662+03:00",
+    "finished": "2026-11-10T19:19:22.9286067+03:00",
+    "wall_sec": 64.2279405,
+    "overall": {
+      "samples": 5000,
+      "errors": 0,
+      "error_rate_percent": 0,
+      "throughput_rps": 77.84773980102942,
+      "average_ms": 0.430912,
+      "median_ms": 0.5098,
+      "p95_ms": 1.1089,
+      "min_ms": 0,
+      "max_ms": 23.9639
+    },
+    "steady": {
+      "samples": 1870,
+      "errors": 0,
+      "error_rate_percent": 0,
+      "throughput_rps": 124.66666666666667,
+      "average_ms": 0.463981,
+      "median_ms": 0.5227,
+      "p95_ms": 1.1796,
+      "min_ms": 0,
+      "max_ms": 23.9639
+    },
+    "labels_steady": [
+      {
+        "label": "POST /api/v1/auth/login",
+        "samples": 375,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 25,
+        "average_ms": 0.493404,
+        "median_ms": 0.5227,
+        "p95_ms": 1.0887,
+        "min_ms": 0,
+        "max_ms": 8.4952
+      },
+      {
+        "label": "GET /api/v1/auth/me",
+        "samples": 375,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 25,
+        "average_ms": 0.374146,
+        "median_ms": 0.4611,
+        "p95_ms": 1.0466,
+        "min_ms": 0,
+        "max_ms": 2.2911
+      },
+      {
+        "label": "POST /api/v1/posts",
+        "samples": 375,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 25,
+        "average_ms": 0.519573,
+        "median_ms": 0.5377,
+        "p95_ms": 1.4652,
+        "min_ms": 0,
+        "max_ms": 2.4288
+      },
+      {
+        "label": "GET /api/v1/posts/{id}",
+        "samples": 370,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 24.666666666666668,
+        "average_ms": 0.407005,
+        "median_ms": 0.4798,
+        "p95_ms": 1.0651,
+        "min_ms": 0,
+        "max_ms": 3.5185
+      },
+      {
+        "label": "PATCH /api/v1/posts/{id}",
+        "samples": 375,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 25,
+        "average_ms": 0.525018,
+        "median_ms": 0.525,
+        "p95_ms": 1.2738,
+        "min_ms": 0,
+        "max_ms": 23.9639
+      }
+    ]
+  },
+  {
+    "name": "50-users",
+    "users": 50,
+    "ramp_up_sec": 50,
+    "hold_sec": 15,
+    "thread_duration_sec": 65,
+    "think_time_ms": 200,
+    "think_time_ceiling_rps": 250,
+    "started": "2026-11-10T19:19:22.9331527+03:00",
+    "finished": "2026-11-10T19:21:17.4107077+03:00",
+    "wall_sec": 114.477555,
+    "overall": {
+      "samples": 16250,
+      "errors": 0,
+      "error_rate_percent": 0,
+      "throughput_rps": 141.94922314684308,
+      "average_ms": 0.339668,
+      "median_ms": 0,
+      "p95_ms": 1.0469,
+      "min_ms": 0,
+      "max_ms": 23.9529
+    },
+    "steady": {
+      "samples": 3733,
+      "errors": 0,
+      "error_rate_percent": 0,
+      "throughput_rps": 248.86666666666667,
+      "average_ms": 0.230557,
+      "median_ms": 0,
+      "p95_ms": 0.7595,
+      "min_ms": 0,
+      "max_ms": 4.0555
+    },
+    "labels_steady": [
+      {
+        "label": "POST /api/v1/auth/login",
+        "samples": 750,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 50,
+        "average_ms": 0.220845,
+        "median_ms": 0,
+        "p95_ms": 0.8106,
+        "min_ms": 0,
+        "max_ms": 2.9032
+      },
+      {
+        "label": "GET /api/v1/auth/me",
+        "samples": 750,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 50,
+        "average_ms": 0.230932,
+        "median_ms": 0,
+        "p95_ms": 0.7286,
+        "min_ms": 0,
+        "max_ms": 2.6136
+      },
+      {
+        "label": "POST /api/v1/posts",
+        "samples": 750,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 50,
+        "average_ms": 0.262315,
+        "median_ms": 0,
+        "p95_ms": 0.8316,
+        "min_ms": 0,
+        "max_ms": 1.7556
+      },
+      {
+        "label": "GET /api/v1/posts/{id}",
+        "samples": 733,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 48.86666666666667,
+        "average_ms": 0.201608,
+        "median_ms": 0,
+        "p95_ms": 0.6153,
+        "min_ms": 0,
+        "max_ms": 1.724
+      },
+      {
+        "label": "PATCH /api/v1/posts/{id}",
+        "samples": 750,
+        "errors": 0,
+        "error_rate_percent": 0,
+        "throughput_rps": 50,
+        "average_ms": 0.236428,
+        "median_ms": 0,
+        "p95_ms": 0.7706,
+        "min_ms": 0,
+        "max_ms": 4.0555
+      }
+    ]
+  }
+]
